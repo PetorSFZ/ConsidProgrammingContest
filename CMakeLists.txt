@@ -16,6 +16,16 @@ else()
 	message(FATAL_ERROR "Non-MSVC support not yet implemented")
 endif()
 
+# Executable
 add_executable(ConsidProgram
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/NaiveSmartAlgorithm.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/NaiveSmartAlgorithm.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/StdSortAlgorithm.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/StdSortAlgorithm.cpp
 )
+
+# Copy test files to binary dir
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_files/Rgn00.txt DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_files/Rgn01.txt DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_files/Rgn02.txt DESTINATION ${CMAKE_BINARY_DIR})
