@@ -36,8 +36,9 @@ int main(int argc, char** argv)
 	const bool TEST_FILE_CORRECT_RESULTS[NUM_TESTS] = {
 		true,
 		true,
-		true
+		false
 	};
+
 	const size_t NUM_ALGORITHMS = 1;
 	const char* ALGORITHM_NAMES[NUM_ALGORITHMS] = {
 		"StdSortAlgorithm"
@@ -45,7 +46,8 @@ int main(int argc, char** argv)
 	bool(*ALGORITHMS[NUM_ALGORITHMS])(const char* path) = {
 		stdSortAlgorithm
 	};
-	const size_t NUM_TEST_ITERATIONS = 5;
+	
+	const size_t NUM_TEST_ITERATIONS = 4;
 
 	for (size_t algorithmIndex = 0; algorithmIndex < NUM_ALGORITHMS; algorithmIndex++) {
 		
@@ -67,7 +69,6 @@ int main(int argc, char** argv)
 				if (result != correctResult) {
 					printf("WARNING: Algorithm \"%s\" returned incorrect result\n", testFilePath);
 				}
-
 			}
 
 			runtime /= double(NUM_TEST_ITERATIONS);
