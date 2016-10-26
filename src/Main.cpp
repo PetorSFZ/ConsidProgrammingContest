@@ -39,12 +39,14 @@ int main(int argc, char** argv)
 		false
 	};
 
-	const size_t NUM_ALGORITHMS = 1;
+	const size_t NUM_ALGORITHMS = 2;
 	const char* ALGORITHM_NAMES[NUM_ALGORITHMS] = {
-		"StdSortAlgorithm"
+		"StdSortAlgorithm",
+		"NaiveSmartAlgorithm"
 	};
 	bool(*ALGORITHMS[NUM_ALGORITHMS])(const char* path) = {
-		stdSortAlgorithm
+		stdSortAlgorithm,
+		naiveSmartAlgorithm
 	};
 	
 	const size_t NUM_TEST_ITERATIONS = 4;
