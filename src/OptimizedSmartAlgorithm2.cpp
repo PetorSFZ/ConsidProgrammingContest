@@ -55,7 +55,7 @@ static __declspec(noalias) size_t readFile(const char* __restrict path, char* __
 // Exposed function
 // ------------------------------------------------------------------------------------------------
 
-bool optimizedSmartAlgorithm(const char* filePath) noexcept
+bool optimizedSmartAlgorithm2(const char* filePath) noexcept
 {
 	// Read file
 	size_t tmpSize = sizeOfFile(filePath) + 16; // +16 so we guarantee SIMD writable
