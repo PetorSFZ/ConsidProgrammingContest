@@ -23,10 +23,44 @@ static __declspec(noalias) size_t sizeOfFile(const char* __restrict path) noexce
 	return size_t(size);
 }
 
-static __declspec(noalias) void workerFunction(const char* __restrict filePath,
+static __declspec(noalias)size_t readFile(const char* __restrict path, char* __restrict outBuffer) noexcept
+{
+	// Open file
+	if (path == nullptr) return 0;
+	FILE* file = fopen(path, "rb");
+	if (file == NULL) return 0;
+
+	// Get size of file
+	fseek(file, 0, SEEK_END);
+	int64_t size = ftell(file);
+	rewind(file); // Rewind position to beginning of file
+	if (size < 0) {
+		fclose(file);
+		return 0;
+	}
+
+	// Read the file into buffer
+	char buffer[BUFSIZ];
+	size_t readSize;
+	size_t currOffs = 0;
+	while ((readSize = fread(buffer, 1, BUFSIZ, file)) > 0) {
+		memcpy(outBuffer + currOffs, buffer, readSize);
+		currOffs += readSize;
+	}
+
+	// Close file and return number of bytes read
+	fclose(file);
+	return currOffs;
+}
+
+static __declspec(noalias) void workerFunction(const char* __restrict file,
                                                uint64_t* __restrict isFoundBitset,
                                                bool* __restrict foundCopy) noexcept
 {
+	// Clear bitset
+	const size_t NUM_BITSET_BYTES = 2197000;
+	memset(isFoundBitset, 0, NUM_BITSET_BYTES);
+
 	// Open file
 	FILE* file = fopen(filePath, "rb");
 	if (file == NULL) return;
@@ -77,22 +111,30 @@ static __declspec(noalias) void workerFunction(const char* __restrict filePath,
 
 bool optimizedSmartAlgorithm3(const char* filePath) noexcept
 {
-	size_t numFileBytes = sizeOfFile(filePath);
-	size_t numCodes = numFileBytes / 8;
+	// Read file
+	size_t tmpSize = sizeOfFile(filePath) + 16; // +16 so we guarantee SIMD readable
+	char* file = static_cast<char*>(_aligned_malloc(tmpSize, 32));
+	size_t fileSize = readFile(filePath, file);
 
-	// Allocate bitset buffer for whether a number is found or not, and clear it
-	const size_t NUM_BITSET_BYTES = 2197000;
-	uint64_t* isFoundBitset = static_cast<uint64_t*>(_aligned_malloc(NUM_BITSET_BYTES, 32));
-	memset(isFoundBitset, 0, NUM_BITSET_BYTES);
+
+	const size_t NUM_THREADS = 1;
+
+	
 
 	// Variable containing whether a copy was found or not
 	bool foundCopy = false;
 
 	// Start threads
-	const size_t NUM_THREADS = 1;
+	uint64_t* bitsets[NUM_THREADS];
 	thread threads[NUM_THREADS];
-	for (thread& t : threads) {
-		t = thread(workerFunction, filePath, isFoundBitset, &foundCopy);
+	for (size_t i = 0; i < NUM_THREADS; i++) {
+
+		// Allocate memory for bitset, cleared in worker function
+		const size_t NUM_BITSET_BYTES = 2197000;
+		bitsets[i] = static_cast<uint64_t*>(_aligned_malloc(NUM_BITSET_BYTES, 32));
+
+		// Start worker thread
+		threads[i] = thread(workerFunction, filePath, bitsets[i], &foundCopy);
 	}
 
 	// Wait for threads to finish working
@@ -100,8 +142,10 @@ bool optimizedSmartAlgorithm3(const char* filePath) noexcept
 		t.join();
 	}
 
-	// Free allocated memory
-	_aligned_free(isFoundBitset);
+	// Free memory
+	for (uint64_t* bitset : bitsets) {
+		_aligned_free(bitset);
+	}
 
 	// Return result
 	return foundCopy;
