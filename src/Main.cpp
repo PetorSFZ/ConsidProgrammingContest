@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "NaiveSmartAlgorithm.hpp"
+#include "OptimizedSmartAlgorithm.hpp"
 #include "StdSortAlgorithm.hpp"
 
 // Statics
@@ -39,14 +40,16 @@ int main(int argc, char** argv)
 		false
 	};
 
-	const size_t NUM_ALGORITHMS = 2;
+	const size_t NUM_ALGORITHMS = 3;
 	const char* ALGORITHM_NAMES[NUM_ALGORITHMS] = {
 		"StdSortAlgorithm",
-		"NaiveSmartAlgorithm"
+		"NaiveSmartAlgorithm",
+		"OptimizedSmartAlgorithm"
 	};
 	bool(*ALGORITHMS[NUM_ALGORITHMS])(const char* path) = {
 		stdSortAlgorithm,
-		naiveSmartAlgorithm
+		naiveSmartAlgorithm,
+		optimizedSmartAlgorithm
 	};
 	
 	const size_t NUM_TEST_ITERATIONS = 4;
