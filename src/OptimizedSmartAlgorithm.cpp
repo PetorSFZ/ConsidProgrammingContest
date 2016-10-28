@@ -1,6 +1,6 @@
 // Copyright(c) Peter Hillerström(skipifzero.com, peter@hstroem.se)
 
-#include "NaiveSmartAlgorithm.hpp"
+#include "OptimizedSmartAlgorithm.hpp"
 
 #include <cstdint>
 #include <cstdio>

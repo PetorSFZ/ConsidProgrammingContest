@@ -1,11 +1,12 @@
 // Copyright(c) Peter Hillerström(skipifzero.com, peter@hstroem.se)
 
-#include "OptimizedSmartAlgorithm2.hpp"
+#include "OptimizedSmartAlgorithm3.hpp"
 
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <malloc.h>
+#include <thread>
 
 using namespace std;
 
@@ -22,25 +23,13 @@ static __declspec(noalias) size_t sizeOfFile(const char* __restrict path) noexce
 	return size_t(size);
 }
 
-// Exposed function
-// ------------------------------------------------------------------------------------------------
-
-bool optimizedSmartAlgorithm2(const char* filePath) noexcept
+static __declspec(noalias) void workerFunction(const char* __restrict filePath,
+                                               uint64_t* __restrict isFoundBitset,
+                                               bool* __restrict foundCopy) noexcept
 {
-	size_t numFileBytes = sizeOfFile(filePath);
-	size_t numCodes = numFileBytes / 8;
-
-	// Allocate bitset buffer for whether a number is found or not, and clear it
-	const size_t NUM_BITSET_BYTES = 2197000;
-	uint64_t* isFoundBitset = static_cast<uint64_t*>(_aligned_malloc(NUM_BITSET_BYTES, 32));
-	memset(isFoundBitset, 0, NUM_BITSET_BYTES);
-
-	// Variable containing whether a copy was found or not
-	bool foundCopy = false;
-
 	// Open file
 	FILE* file = fopen(filePath, "rb");
-	if (file == NULL) return false;
+	if (file == NULL) return;
 
 	// Read through the file
 	const size_t BUFFER_SIZE = 512;
@@ -73,7 +62,7 @@ bool optimizedSmartAlgorithm2(const char* filePath) noexcept
 			bool exists = (bitMask & chunk) != 0;
 
 			if (exists) {
-				foundCopy = true;
+				*foundCopy = true;
 				break;
 			}
 
@@ -81,8 +70,39 @@ bool optimizedSmartAlgorithm2(const char* filePath) noexcept
 			isFoundBitset[bitsetChunkIndex] = chunk;
 		}
 	}
+}
 
-	// Free allocated memory and return result
+// Exposed function
+// ------------------------------------------------------------------------------------------------
+
+bool optimizedSmartAlgorithm3(const char* filePath) noexcept
+{
+	size_t numFileBytes = sizeOfFile(filePath);
+	size_t numCodes = numFileBytes / 8;
+
+	// Allocate bitset buffer for whether a number is found or not, and clear it
+	const size_t NUM_BITSET_BYTES = 2197000;
+	uint64_t* isFoundBitset = static_cast<uint64_t*>(_aligned_malloc(NUM_BITSET_BYTES, 32));
+	memset(isFoundBitset, 0, NUM_BITSET_BYTES);
+
+	// Variable containing whether a copy was found or not
+	bool foundCopy = false;
+
+	// Start threads
+	const size_t NUM_THREADS = 1;
+	thread threads[NUM_THREADS];
+	for (thread& t : threads) {
+		t = thread(workerFunction, filePath, isFoundBitset, &foundCopy);
+	}
+
+	// Wait for threads to finish working
+	for (thread& t : threads) {
+		t.join();
+	}
+
+	// Free allocated memory
 	_aligned_free(isFoundBitset);
+
+	// Return result
 	return foundCopy;
 }
