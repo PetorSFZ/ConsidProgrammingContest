@@ -36,7 +36,7 @@ static bool singleThreadedSearch(const uint8_t* __restrict fileView, uint64_t fi
 	// Variable containing whether a copy was found or not
 	bool foundCopy = false;
 
-	for (size_t i = 0; i < fileSize; i += 8) {
+	for (size_t i = 0; i < fileSize; i += BYTES_PER_CODE) {
 		char let3 = fileView[i];
 		char let2 = fileView[i + 1];
 		char let1 = fileView[i + 2];
