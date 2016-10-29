@@ -20,8 +20,8 @@ using namespace std;
 
 #define NUM_THREADS 8
 
-#define CODE_ALLOCATION_BATCH_SIZE 8192
-
+//#define CODE_ALLOCATION_BATCH_SIZE 8192
+#define CODE_ALLOCATION_BATCH_SIZE 32768
 
 // Statics
 // ------------------------------------------------------------------------------------------------
@@ -210,26 +210,73 @@ bool optimizedSmartAlgorithm3(const char* filePath) noexcept
 
 	// Compare all threads tables
 	if (!foundCopy) {
-		uint64_t bitsetChunks[NUM_THREADS];
-
 		for (size_t i = 0; i < (NUM_BITSET_BYTES / sizeof(uint64_t)); i++) {
-			for (size_t j = 0; j < NUM_THREADS; j++) {
-				bitsetChunks[j] = bitsets[j][i];
-			}
 			
-			for (size_t j = 0; j < NUM_THREADS; j++) {
-				for (size_t k = 0; k < NUM_THREADS; k++) {
-					if (j == k) continue;
-
-					if ((bitsetChunks[j] & bitsetChunks[k]) != uint64_t(0)) {
-						foundCopy = true;
-						goto out;
-					}
-				}
+#if NUM_THREADS == 4
+			uint64_t b1 = bitsets[0][i];
+			uint64_t b2 = bitsets[1][i];
+			uint64_t b3 = bitsets[2][i];
+			uint64_t b4 = bitsets[3][i];
+			
+			bool found = ((b1 & b2) | (b1 & b3) | (b1 & b4) | (b2 & b3) | (b2 & b4) | (b3 & b4)) != uint64_t(0);
+			if (found) {
+				foundCopy = true;
+				break;
 			}
+#elif NUM_THREADS == 8
+			uint64_t b1 = bitsets[0][i];
+			uint64_t b2 = bitsets[1][i];
+			uint64_t b3 = bitsets[2][i];
+			uint64_t b4 = bitsets[3][i];
+			uint64_t b5 = bitsets[4][i];
+			uint64_t b6 = bitsets[5][i];
+			uint64_t b7 = bitsets[6][i];
+			uint64_t b8 = bitsets[7][i];
+
+			uint64_t val =
+			(b1 & b2) |
+			(b1 & b3) |
+			(b1 & b4) |
+			(b1 & b5) |
+			(b1 & b6) |
+			(b1 & b7) |
+			(b1 & b8) |
+
+			(b2 & b3) |
+			(b2 & b4) |
+			(b2 & b5) |
+			(b2 & b6) |
+			(b2 & b7) |
+			(b2 & b8) |
+			
+			(b3 & b4) |
+			(b3 & b5) |
+			(b3 & b6) |
+			(b3 & b7) |
+			(b3 & b8) |
+
+			(b4 & b5) |
+			(b4 & b6) |
+			(b4 & b7) |
+			(b4 & b8) |
+			
+			(b5 & b6) |
+			(b5 & b7) |
+			(b5 & b8) |
+
+			(b6 & b7) |
+			(b6 & b8) |
+
+			(b7 & b8);
+
+			if (val != uint64_t(0)) {
+				foundCopy = true;
+				break;
+			}
+#else
+#error Not implemented
+#endif
 		}
-		out:
-		int a;
 	}
 
 	// Free memory
