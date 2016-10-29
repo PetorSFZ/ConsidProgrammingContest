@@ -12,6 +12,7 @@
 #include "OptimizedSmartAlgorithm4.hpp"
 #include "OptimizedSmartAlgorithm5.hpp"
 #include "OptimizedSmartAlgorithm6.hpp"
+#include "OptimizedSmartAlgorithm7.hpp"
 #include "StdSortAlgorithm.hpp"
 
 // Statics
@@ -45,29 +46,31 @@ int main(int argc, char** argv)
 		false
 	};
 
-	const size_t NUM_ALGORITHMS = 6;
+	const size_t NUM_ALGORITHMS = 2;
 	const char* ALGORITHM_NAMES[NUM_ALGORITHMS] = {
 		//"StdSortAlgorithm",
 		//"NaiveSmartAlgorithm",
-		"OptimizedSmartAlgorithm",
-		"OptimizedSmartAlgorithm2",
-		"OptimizedSmartAlgorithm3",
-		"OptimizedSmartAlgorithm4",
+		//"OptimizedSmartAlgorithm",
+		//"OptimizedSmartAlgorithm2",
+		//"OptimizedSmartAlgorithm3",
+		//"OptimizedSmartAlgorithm4",
 		"OptimizedSmartAlgorithm5",
-		"optimizedSmartAlgorithm6"
+		//"OptimizedSmartAlgorithm6",
+		"OptimizedSmartAlgorithm7"
 	};
 	bool(*ALGORITHMS[NUM_ALGORITHMS])(const char* path) = {
 		//stdSortAlgorithm,
 		//naiveSmartAlgorithm,
-		optimizedSmartAlgorithm,
-		optimizedSmartAlgorithm2,
-		optimizedSmartAlgorithm3,
-		optimizedSmartAlgorithm4,
+		//optimizedSmartAlgorithm,
+		//optimizedSmartAlgorithm2,
+		//optimizedSmartAlgorithm3,
+		//optimizedSmartAlgorithm4,
 		optimizedSmartAlgorithm5,
-		optimizedSmartAlgorithm6
+		//optimizedSmartAlgorithm6,
+		optimizedSmartAlgorithm7
 	};
 	
-	const size_t NUM_TEST_ITERATIONS = 4;
+	const size_t NUM_TEST_ITERATIONS = 128;
 
 	for (size_t algorithmIndex = 0; algorithmIndex < NUM_ALGORITHMS; algorithmIndex++) {
 		
