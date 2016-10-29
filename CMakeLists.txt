@@ -31,6 +31,8 @@ add_executable(ConsidProgram
 	${CMAKE_CURRENT_SOURCE_DIR}/src/OptimizedSmartAlgorithm4.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/OptimizedSmartAlgorithm5.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/OptimizedSmartAlgorithm5.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/OptimizedSmartAlgorithm6.hpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/OptimizedSmartAlgorithm6.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/StdSortAlgorithm.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/StdSortAlgorithm.cpp
 )

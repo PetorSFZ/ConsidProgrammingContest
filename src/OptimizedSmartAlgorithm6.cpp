@@ -1,6 +1,6 @@
 // Copyright(c) Peter Hillerström(skipifzero.com, peter@hstroem.se)
 
-#include "OptimizedSmartAlgorithm5.hpp"
+#include "OptimizedSmartAlgorithm6.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -13,6 +13,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <malloc.h>
+
+#include <nmmintrin.h>
 
 using namespace std;
 
@@ -41,22 +43,65 @@ static bool singleThreadedSearch(const uint8_t* __restrict fileView, uint64_t fi
 	// Variable containing whether a copy was found or not
 	bool foundCopy = false;
 
+	//alignas(16) uint8_t buffer[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+	//__m128i a = _mm_set_epi8(;
+
 	for (size_t i = 0; i < fileSize; i += 8) {
-		char let3 = fileView[i];
+		/*char let3 = fileView[i];
 		char let2 = fileView[i + 1];
 		char let1 = fileView[i + 2];
 		char no3 = fileView[i + 3];
 		char no2 = fileView[i + 4];
-		char no1 = fileView[i + 5];
+		char no1 = fileView[i + 5];*/
+
+		// high [0, 0, 0, 0, 'Z', 'Z', '9', '9'] low, u16
+		const __m128i raw = _mm_setr_epi16(fileView[i + 4], fileView[i + 3], fileView[i + 2], fileView[i + 1],
+		                                   0, 0, 0, 0);
+		
+		// high [0, 0, 0, 0, 25, 25, 9, 9] low, u16
+		const __m128i SUBTRACT_CHARS = _mm_setr_epi16('0', '0', 'A', 'A', 0, 0, 0, 0);
+		const __m128i tmp1 = _mm_sub_epi16(raw, SUBTRACT_CHARS);
+
+		// high [0, 0, Z*26000 + Z*1000, 9*100 + 9*10] low, u32
+		const __m128i MULT_FACTORS = _mm_setr_epi16(10, 100, 1000, 26000, 0, 0, 0, 0);
+		const __m128i tmp2 = _mm_madd_epi16(tmp1, MULT_FACTORS);
+
+		// high [0, 0, 0, Z*26000 + Z*1000, 9*100 + 9*10] low, u32
+		const __m128i tmp3 = _mm_add_epi32(tmp2, _mm_srli_si128(tmp2, 4));
+		uint32_t tmp3Val = _mm_cvtsi128_si32(tmp3);
+		
+		// Calculate final number
+		uint32_t number = uint32_t(fileView[i] - 'A') * 676000u + tmp3Val + uint32_t(fileView[i + 5] - '0');
+
+
+		/*// [0, 0, ... 0, 'Z', 'Z', 'Z', '9', '9', '9'] (u8)
+		const __m128i rawCode = _mm_setr_epi8(0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		   fileView[i], fileView[i+1], fileView[i+2], fileView[i+3], fileView[i+4], fileView[i+5]);
+
+		// [0, 0, ... , 0, 25, 25, 25, 9, 9, 9] (u8)
+		const __m128i SUBTRACT_CHARS = _mm_setr_epi8(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'A', 'A', 'A', '0', '0', '0');
+		const __m128i partNumbers = _mm_sub_epi8(rawCode, SUBTRACT_CHARS);
+
+		// [0, 9, 9, 9] (u32), extends "number" part of code to u32
+		const __m128i LOW_PART_SHUFFLE_MASK = _mm_setr_epi8(0xFF, 0xFF, 0xFF, 0xFF,
+		                                                    0xFF, 0xFF, 0xFF, 0x02,
+		                                                    0xFF, 0xFF, 0xFF, 0x01,
+		                                                    0xFF, 0xFF, 0xFF, 0x00);
+		const __m128i lowPartNumbers = _mm_shuffle_epi8(partNumbers, LOW_PART_SHUFFLE_MASK);
+
+		const __m128i LOW_PART_MULT_FACTORS = _mm_setr_epi32(0, 100, 10, 1);
+		const __m128i lowPartMultplied = _mm_mul_epu32(lowPartNumbers, LOW_PART_MULT_FACTORS);*/
+
 
 		// Calculate corresponding number for code
-		uint32_t number = uint32_t(let3 - 'A') * 676000u +
+	/*	uint32_t number = uint32_t(let3 - 'A') * 676000u +
 		                  uint32_t(let2 - 'A') * 26000u +
 		                  uint32_t(let1 - 'A') * 1000u +
 		                  uint32_t(no3 - '0') * 100u +
 		                  uint32_t(no2 - '0') * 10u +
 		                  uint32_t(no1 - '0');
-
+*/
 		uint32_t bitsetChunkIndex = number / 64;
 		uint64_t bitIndex = number % 64;
 
@@ -280,7 +325,7 @@ static bool multiThreadedSearch(const uint8_t* __restrict fileView, uint64_t num
 // Exposed function
 // ------------------------------------------------------------------------------------------------
 
-bool optimizedSmartAlgorithm5(const char* filePath) noexcept
+bool optimizedSmartAlgorithm6(const char* filePath) noexcept
 {
 	// Open file
 	HANDLE file = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
