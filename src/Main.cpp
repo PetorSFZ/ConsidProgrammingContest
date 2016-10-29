@@ -10,6 +10,7 @@
 #include "OptimizedSmartAlgorithm2.hpp"
 #include "OptimizedSmartAlgorithm3.hpp"
 #include "OptimizedSmartAlgorithm4.hpp"
+#include "OptimizedSmartAlgorithm5.hpp"
 #include "StdSortAlgorithm.hpp"
 
 // Statics
@@ -43,14 +44,15 @@ int main(int argc, char** argv)
 		false
 	};
 
-	const size_t NUM_ALGORITHMS = 4;
+	const size_t NUM_ALGORITHMS = 5;
 	const char* ALGORITHM_NAMES[NUM_ALGORITHMS] = {
 		//"StdSortAlgorithm",
 		//"NaiveSmartAlgorithm",
 		"OptimizedSmartAlgorithm",
 		"OptimizedSmartAlgorithm2",
 		"OptimizedSmartAlgorithm3",
-		"OptimizedSmartAlgorithm4"
+		"OptimizedSmartAlgorithm4",
+		"OptimizedSmartAlgorithm5"
 	};
 	bool(*ALGORITHMS[NUM_ALGORITHMS])(const char* path) = {
 		//stdSortAlgorithm,
@@ -58,7 +60,8 @@ int main(int argc, char** argv)
 		optimizedSmartAlgorithm,
 		optimizedSmartAlgorithm2,
 		optimizedSmartAlgorithm3,
-		optimizedSmartAlgorithm4
+		optimizedSmartAlgorithm4,
+		optimizedSmartAlgorithm5
 	};
 	
 	const size_t NUM_TEST_ITERATIONS = 4;
